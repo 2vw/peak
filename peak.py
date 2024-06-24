@@ -12,7 +12,15 @@ with open("config.json") as f:
 # role stuff - 25% done
 # and other shit - ???
 
-bot = commands.AutoShardedBot(command_prefix=['p!', 'peak!', 'P!', '?'], intents=discord.Intents.all(), strip_after_prefix=True)
+def getprefix(bot, message):
+    if message.guild is None:
+        return ["p!", "p?", "p.", "P!", "P?", "P."]
+    if message.guild.id == 1238555988538167306:
+        return ['p!', '?', ',']
+    else:
+        return ["p!"]
+
+bot = commands.AutoShardedBot(command_prefix=getprefix, intents=discord.Intents.all(), strip_after_prefix=True)
 cmtotal = 0
 uptime = time.time()
 

@@ -145,6 +145,24 @@ class Utility(commands.Cog, name="Utility"):
         embed.set_footer(text=f"Requested by {ctx.author.name}")
         await ctx.send(embed=embed)
     
+    @commands.command(name="savatar", aliases=["sav", "spfp"])
+    async def avatar(self, ctx, member: discord.Member = None):
+        if not member:
+            member = ctx.author
+        embed = discord.Embed(title=f"Server Avatar - {member.name}#{member.discriminator}", description=member.mention, color=member.color)
+        embed.set_image(url=member.display_avatar.url)
+        embed.set_footer(text=f"Requested by {ctx.author.name}")
+        await ctx.send(embed=embed)
+    
+    @commands.command(name="banner", aliases=['ub'])
+    async def banner(self, ctx, member: discord.Member = None):
+        if not member:
+            member = ctx.author
+        embed = discord.Embed(title=f"User Banner - {member.name}#{member.discriminator}", description=member.mention, color=member.color)
+        embed.set_thumbnail(url=member.banner.url)
+        embed.set_footer(text=f"Requested by {ctx.author.name}")
+        await ctx.send(embed=embed)
+    
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.channel.id not in sniped_messages:

@@ -105,8 +105,11 @@ class Moderation(commands.Cog, name="Moderation"):
             await ctx.send("You cannot delete more than 1000 messages at a time")
             return
         else:
-            await ctx.channel.purge(limit=amount + 1)
-            await ctx.send(f"Deleted {amount} messages!")
+            max_purge_amount = 100 if amount <= 100 else 250
+            for i in range(0, amount, max_purge_amount):
+                purge_amount = min(max_purge_amount, amount - i)
+                await ctx.channel.purge(limit=purge_amount + 1)
+            await ctx.send(f"Deleted {amount} messages!", delete_after=5)
 
     def convert_timestamp(self, timestamp):
         unit = timestamp[-1]

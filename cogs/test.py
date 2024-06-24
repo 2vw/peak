@@ -53,8 +53,9 @@ class test(commands.Cog):
         """
         # Send a message to the system channel when a member joins
         channel = member.guild.system_channel
-        if channel is not None:
-            await channel.send(f'aye my nigga {member.mention} just joined whats up')
+        if member.guild.id == 1238555988538167306:
+            if channel is not None:
+                await channel.send(f'aye my nigga {member.mention} just joined whats up')
 
     @commands.Cog.listener()
     async def on_guild_booster_add(self, member):
@@ -72,9 +73,10 @@ class test(commands.Cog):
             member (discord.Member): The member who left the guild.
         """
         # Send a message to the system channel when a member leaves
-        channel = member.guild.system_channel
-        if channel is not None:
-            await channel.send(f'aye my nigga **{member.name}** just left wtf bro.. u my opp..')
+        if member.guild.id == 1238555988538167306:
+            channel = member.guild.system_channel
+            if channel is not None:
+                await channel.send(f'aye my nigga **{member.name}** just left wtf bro.. u my opp..')
 
     @commands.command()
     async def test(self, ctx):
