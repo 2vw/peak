@@ -1,5 +1,19 @@
-import discord, asyncio, datetime
+import discord, asyncio, datetime, time
 from discord.ext import commands
+
+def convert_timestamp(timestamp):
+    unit = timestamp[-1]
+    value = timestamp[:-1]
+    if unit == "d":
+        return int(value) * 86400
+    elif unit == "h":
+        return int(value) * 3600
+    elif unit == "m":
+        return int(value) * 60
+    elif unit == "s":
+        return int(value)
+    else:
+        return None
 
 class Moderation(commands.Cog, name="Moderation"):
     def __init__(self, bot):
@@ -89,6 +103,7 @@ class Moderation(commands.Cog, name="Moderation"):
         embed.add_field(name="Member", value=member.mention, inline=False)
         embed.add_field(name="Role", value=role.mention, inline=False)
         await ctx.send(embed=embed)
+        
     @commands.command(name="purge", aliases=["clear"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount: int):
@@ -105,25 +120,11 @@ class Moderation(commands.Cog, name="Moderation"):
             await ctx.send("You cannot delete more than 1000 messages at a time")
             return
         else:
-            max_purge_amount = 100 if amount <= 100 else 250
+            max_purge_amount = 100 if amount <= 100 else 100
             for i in range(0, amount, max_purge_amount):
                 purge_amount = min(max_purge_amount, amount - i)
-                await ctx.channel.purge(limit=purge_amount + 1)
+                await ctx.channel.purge(limit=purge_amount + 1, check=lambda m: not m.pinned)
             await ctx.send(f"Deleted {amount} messages!", delete_after=5)
-
-    def convert_timestamp(self, timestamp):
-        unit = timestamp[-1]
-        value = timestamp[:-1]
-        if unit == "d":
-            return int(value) * 86400
-        elif unit == "h":
-            return int(value) * 3600
-        elif unit == "m":
-            return int(value) * 60
-        elif unit == "s":
-            return int(value)
-        else:
-            return None
 
     @commands.command(name="ban", aliases=["softban"], usage="<member> <reason> [duration] [delete_message_days=7]",)
     @commands.has_permissions(ban_members=True)
@@ -134,16 +135,16 @@ class Moderation(commands.Cog, name="Moderation"):
             embed.add_field(name="Examples", value=f"`{ctx.prefix}{ctx.command.qualified_name} ks garbage staff member`", inline=False)
             await ctx.send(embed=embed)
             return
-        if not ctx.author.guild_permissions.ban_members:
+        elif not ctx.author.guild_permissions.ban_members:
             await ctx.send("You must have `ban_members` permission to use this command")
             return
-        if member.top_role >= ctx.author.top_role:
+        elif member.top_role >= ctx.author.top_role:
             await ctx.send("You cannot ban a member with a role higher than or equal to your own")
             return
-        if ctx.guild.me.top_role < member.top_role:
+        elif ctx.guild.me.top_role < member.top_role:
             await ctx.send("I cannot ban a member with a role higher than my own")
             return
-        if not reason:
+        if not reason: # required if right?
             reason = "No reason provided"
         await member.ban(reason=reason, delete_message_days=delete_message_days)
         if duration:
@@ -178,13 +179,13 @@ class Moderation(commands.Cog, name="Moderation"):
             embed.add_field(name="Examples", value=f"`{ctx.prefix}{ctx.command.qualified_name} ksiscute garbage weirdo`", inline=False)
             await ctx.send(embed=embed)
             return
-        if not ctx.author.guild_permissions.kick_members:
+        elif not ctx.author.guild_permissions.kick_members:
             await ctx.send("You must have `kick_members` permission to use this command")
             return
-        if member.top_role >= ctx.author.top_role:
+        elif member.top_role >= ctx.author.top_role:
             await ctx.send("You cannot kick a member with a role higher than or equal to your own")
             return
-        if ctx.guild.me.top_role < member.top_role:
+        elif ctx.guild.me.top_role < member.top_role:
             await ctx.send("I cannot kick a member with a role higher than my own")
             return
         if not reason:
@@ -201,22 +202,23 @@ class Moderation(commands.Cog, name="Moderation"):
             embed.add_field(name="Examples", value=f"`{ctx.prefix}{ctx.command.qualified_name} ksiscute peak user`", inline=False)
             await ctx.send(embed=embed)
             return
-        if not ctx.author.guild_permissions.manage_nicknames:
+        elif not ctx.author.guild_permissions.manage_nicknames:
             await ctx.send("You must have `manage_nicknames` permission to use this command")
             return
-        if not nickname:
-            await ctx.send("You must provide a nickname")
+        elif not nickname:
+            await member.edit(nick=member.global_name)
+            await ctx.send(f"Reset nickname of *{member.global_name}*")
             return
-        await member.edit(nick=nickname)
+        await member.edit(nick=nickname) 
         await ctx.send(f"Changed nickname of *{member.name}* to **{nickname}**")
         
-    @commands.command(name="mute", usage="<member> <reason> [duration]", aliases=["tempmute", 'timeout', 'tm'])
+    @commands.command(name="mute", usage="<member> <reason> [duration]", aliases=["tempmute", 'timeout', 'tm'], description="Mutes a member")
     @commands.has_permissions(manage_messages=True)
-    async def mute(self, ctx, member: discord.Member=None, *, reason: str=None, duration: str=None):
+    async def mute(self, ctx, member: discord.Member=None, duration: str=None, *, reason: str=None):
         if not member:
             embed = discord.Embed(title="Mute", color=discord.Color.red())
             embed.add_field(name="Usage", value=f"`{ctx.prefix}{ctx.command.qualified_name} {ctx.command.usage}`", inline=False)
-            embed.add_field(name="Examples", value=f"`{ctx.prefix}{ctx.command.qualified_name} ksiscute \"garbage staff member\" 10m`\n`{ctx.prefix}{ctx.command.qualified_name} ks ewwww 1h`", inline=False)
+            embed.add_field(name="Examples", value=f"`{ctx.prefix}{ctx.command.qualified_name} ksiscute 1d1h10m \"garbage staff member\"`\n`{ctx.prefix}{ctx.command.qualified_name} ks ewwww 1h`", inline=False)
             await ctx.send(embed=embed)
             return
         if not ctx.author.guild_permissions.manage_messages:
@@ -231,11 +233,11 @@ class Moderation(commands.Cog, name="Moderation"):
         if not reason:
             reason = "No reason provided"
         if not duration:
-            duration = datetime.datetime.now() + datetime.timedelta(days=3*365)
+            d = 640000
         else:
-            duration = datetime.datetime.fromtimestamp(duration)
-        await ctx.send(f"Muted *{member.name}* for **{reason}**")
-        await member.timeout(duration, reason=reason)
+            d = convert_timestamp(duration)
+        await ctx.send(f"Muted *{member.name}* for *{duration if d != 640000 else 'ever'}*, **{reason}**")
+        await member.timeout_for(datetime.timedelta(seconds=d), reason=reason)
 
     @commands.command(name="admins")
     async def admins(self, ctx):

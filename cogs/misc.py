@@ -5,11 +5,11 @@ class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(name="fuck")
+    @commands.command(name="sex", usage="[member]", aliases=["unholy", 'frick'])
     @commands.is_nsfw()
-    async def fuck(self, ctx, member: discord.Member=None):
+    async def sex(self, ctx, member: discord.Member=None):
         """
-        Fucks an NSFW image
+        Sends an nsfw image
         """
         if member is None:
             return await ctx.reply("Bro.. are u that lonely? Damn...")
@@ -98,20 +98,6 @@ class Misc(commands.Cog):
                 await message.add_reaction("💀")
             if "star" in message.content.lower():
                 await message.add_reaction("⭐")
-            if "hate" in message.content.lower():
-                await message.add_reaction("🤬")
-            if "nigger" in message.content.lower():
-                await message.add_reaction("👹")
-            if "nigga" in message.content.lower():
-                await message.add_reaction("👿")
-            if "gay" in message.content.lower():
-                await message.add_reaction("🏳️‍🌈")
-            if "fag" in message.content.lower():
-                await message.add_reaction("🤢")
-            if "nerd" in message.content.lower():
-                await message.add_reaction("🤓")
-            if "femboy" in message.content.lower():
-                await message.add_reaction("<a:cum:1249891734457028671>")
 
 def setup(bot):
     bot.add_cog(Misc(bot))

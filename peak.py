@@ -4,21 +4,23 @@ from discord.ext import commands
 with open("config.json") as f:
     config = json.load(f)
 
-# make it do polls n shit
-# announce funny shit
-# moderate - on the way
-# cosmetics
-# manage verification
-# role stuff - 25% done
-# and other shit - ???
+# make it do polls n shit <- this is basically done i just need to finish some shit
+# announce funny shit 
+# moderate - on the way <- 50%?
+# cosmetics <- fuck does this mean 
+# manage verification <- honestly idek ez
+# role stuff - 25% done (basically done just gotta add an autofill feature)
+# and other shit - ??? (what am i mee6)
 
 def getprefix(bot, message):
     if message.guild is None:
         return ["p!", "p?", "p.", "P!", "P?", "P."]
-    if message.guild.id == 1238555988538167306:
+    elif message.guild.id == 1238555988538167306:
         return ['p!', '?', ',']
     else:
         return ["p!"]
+
+# i know
 
 bot = commands.AutoShardedBot(command_prefix=getprefix, intents=discord.Intents.all(), strip_after_prefix=True)
 cmtotal = 0
@@ -36,8 +38,7 @@ async def on_ready():
             try:
                 bot.load_extension(f'cogs.{filename[:-3]}') # :-3
             except Exception as e:
-                print(e)
-
+                return e 
 
 @bot.before_invoke
 async def before_invoke(ctx):

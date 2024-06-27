@@ -290,7 +290,7 @@ class Utility(commands.Cog, name="Utility"):
         if message.author.bot:
             return
         # Check if the message mentions someone who is afk
-        if message.mentions:
+        elif message.mentions:
             for user in message.mentions:
                 if user.id in afk_data:
                     afk_reason = afk_data[user.id]['reason']
@@ -300,7 +300,7 @@ class Utility(commands.Cog, name="Utility"):
                     embed = discord.Embed(title=f"{user.display_name} is AFK", description=f"Reason: {afk_reason}", color=discord.Color.purple())
                     embed.add_field(name="AFK for", value=f"{str(hours) + 'h ' if int(hours) > 0 else ''}{str(minutes) + 'm ' if int(minutes) > 0 else ''}{str(seconds) + 's' if int(seconds) > 0 else ''}")
                     await message.reply(embed=embed, delete_after=3)
-        if message.author.id in afk_data:
+        elif message.author.id in afk_data:
             time_afk = time.time() - afk_data[message.author.id]['time']
             if time_afk > 1:
                 afk_time = round(time.time() - afk_data[message.author.id]['time'])
