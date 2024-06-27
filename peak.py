@@ -1,4 +1,5 @@
-import discord, time, asyncio, os, json
+import discord, time, asyncio, os, json, motor, pymongo
+from motor import motor_asyncio
 from discord.ext import commands
 
 with open("config.json") as f:
@@ -12,13 +13,17 @@ with open("config.json") as f:
 # role stuff - 25% done (basically done just gotta add an autofill feature)
 # and other shit - ??? (what am i mee6)
 
-def getprefix(bot, message):
+client = motor.motor_asyncio.AsyncIOMotorClient(config["DB_URI"])
+db = client["peak"]
+userdb = db["users"]
+serverdb = db["servers"]
+
+
+async def getprefix(bot, message):
     if message.guild is None:
         return ["p!", "p?", "p.", "P!", "P?", "P."]
-    elif message.guild.id == 1238555988538167306:
-        return ['p!', '?', ',']
     else:
-        return ["p!"]
+        return (await serverdb.find_one({"_id": f"{message.guild.id}"}))["data"]["settings"]["prefix"]
 
 # i know
 
