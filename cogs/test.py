@@ -54,7 +54,7 @@ class test(commands.Cog):
         # Send a message to the system channel when a member joins
         channel = member.guild.system_channel
         if member.guild.id == 1238555988538167306:
-            if channel is not None:
+            if channel is not None: 
                 await channel.send(f'aye my nigga {member.mention} just joined whats up')
 
     @commands.Cog.listener()

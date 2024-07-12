@@ -1,4 +1,4 @@
-import discord, json, asyncio, datetime, time, motor
+import discord, json, asyncio, datetime, time, motor, aiohttp
 from discord.ext import commands
 
 sniped_messages = {}
@@ -10,6 +10,19 @@ with open("config.json") as f:
 
 """from ro_py import Client # type: ignore
 client = Client()"""
+
+async def _steal_emoji(ctx, emoji):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(emoji.url) as response:
+                if response.status != 200:
+                    return f"Failed to download emoji: {response.reason}"
+                emoji_data = await response.read()
+        emoji_name = emoji.name
+        emoji = await ctx.guild.create_custom_emoji(name=emoji_name, image=emoji_data)
+        return emoji
+    except discord.HTTPException as e:
+        return f"Failed to steal emoji: {e}"
 
 class Utility(commands.Cog, name="Utility"):
     def __init__(self, bot):
@@ -331,6 +344,42 @@ class Utility(commands.Cog, name="Utility"):
             await ctx.send(f"{user.display_name} is not currently afk.")
                         
             # ks will this work idk python
+
+    @commands.command(name="stealemoji", aliases=["steal", 'getemoji', 'clone'])
+    async def stealemoji(ctx, *emojis: discord.PartialEmoji):
+        """Steal up to 20 emojis from another server and add them to this server!"""
+        if not emojis:
+            return
+        if len(emojis) > 20:
+            await ctx.reply("You can't steal more than 10 emojis at once.")
+            return
+        if not ctx.guild.me.guild_permissions.manage_emojis:
+            await ctx.reply("I don't have permission to add emojis to this server.")
+            return
+        embed = discord.Embed(title="Stolen emojis", description=f"*Please wait...*", color=discord.Color.random())
+        seen_emojis = set()
+        tasks = []
+        emoji_list = list(emojis)
+        for i, emoji in enumerate(emoji_list):
+            if emoji in seen_emojis:
+                await ctx.reply(f"You can't steal the same emoji twice!")
+                emoji_list = emoji_list[:i] + emoji_list[i+1:]
+                continue
+            seen_emojis.add(emoji)
+            tasks.append(_steal_emoji(ctx, emoji))
+        if emoji_list:
+            emojis = tuple(emoji_list)
+        else:
+            emojis = ()
+        results = await asyncio.gather(*tasks)
+        msg = await ctx.reply(embed=embed)
+        for result in results:
+            if isinstance(result, str):
+                embed.add_field(name="Error", value=result, inline=False)
+            else:
+                embed.add_field(name=result.name, value=":white_check_mark:", inline=True)
+                await msg.edit(embed=embed)
+
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

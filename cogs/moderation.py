@@ -212,7 +212,7 @@ class Moderation(commands.Cog, name="Moderation"):
         await member.edit(nick=nickname) 
         await ctx.send(f"Changed nickname of *{member.name}* to **{nickname}**")
         
-    @commands.command(name="mute", usage="<member> <reason> [duration]", aliases=["tempmute", 'timeout', 'tm'], description="Mutes a member")
+    @commands.command(name="mute", usage="<member> <reason> [duration]", aliases=["tempmute", 'timeout', 'tm', 'to'], description="Mutes a member")
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, member: discord.Member=None, duration: str=None, *, reason: str=None):
         if not member:
@@ -263,10 +263,10 @@ class Moderation(commands.Cog, name="Moderation"):
         if not ctx.author.guild_permissions.manage_messages:
             await ctx.send("You must have `manage_messages` permission to use this command")
             return
-        if member.top_role >= ctx.author.top_role:
+        elif member.top_role >= ctx.author.top_role:
             await ctx.send("You cannot unmute a member with a role higher than or equal to your own")
             return
-        if ctx.guild.me.top_role < member.top_role:
+        elif ctx.guild.me.top_role < member.top_role:
             await ctx.send("I cannot unmute a member with a role higher than my own")
             return
         if not reason:
@@ -276,7 +276,7 @@ class Moderation(commands.Cog, name="Moderation"):
     
     @commands.command(name="nuke", usage="<channel>")
     @commands.has_permissions(manage_channels=True)
-    async def duplicate(self, ctx, channel: discord.TextChannel=None):
+    async def nuke(self, ctx, channel: discord.TextChannel=None):
         """
         Duplicates the channel, then deletes the old one, and sends a message in the new one
         """
@@ -309,23 +309,23 @@ class Moderation(commands.Cog, name="Moderation"):
             error_embed = discord.Embed(description=f"{member.mention} already has the {role_name} role", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return
-        if not ctx.author.guild_permissions.manage_roles:
+        elif not ctx.author.guild_permissions.manage_roles:
             error_embed = discord.Embed(description="You must have `manage_roles` permission to use this command", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return
-        if member.top_role >= ctx.author.top_role:
+        elif member.top_role >= ctx.author.top_role:
             error_embed = discord.Embed(description="You cannot add/remove a role from a member with a role higher than or equal to your own", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return
-        if ctx.guild.me.top_role < member.top_role:
+        elif ctx.guild.me.top_role < member.top_role:
             error_embed = discord.Embed(description="I cannot add/remove a role from a member with a role higher than my own", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return
-        if not role:
+        elif not role:
             error_embed = discord.Embed(description=f"Role {role_name} does not exist", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return
-        if role >= ctx.guild.me.top_role:
+        elif role >= ctx.guild.me.top_role:
             error_embed = discord.Embed(title="Error", description="I cannot add/remove a role higher than my own", color=discord.Color.red())
             await ctx.send(embed=error_embed)
             return

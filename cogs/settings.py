@@ -75,14 +75,14 @@ async def add_server(ctx):
             }
         })
 
-async def add_user(ctx):
-    if (await serverdb.find_one({"_id": f"{ctx.guild.id}"})):
-        if ctx.author.id in (await serverdb.find_one({"_id": f"{ctx.guild.id}"}))["data"]["users"]:
+async def add_user(ctx, server):
+    if (await serverdb.find_one({"_id": f"{server.id}"})):
+        if ctx.id in (await serverdb.find_one({"_id": f"{server.id}"}))["data"]["users"]:
             return True
         else:
             serverdb.update_one(
-                {"_id": f"{ctx.guild.id}"},
-                {"$set": {"data.users": {f"{ctx.author.id}": {"xp": 0, "multiplier": 1, "banned": False, "created_at": f"{time.time()}", "moderation": {"warns": {}, "notes": {}}}}}}
+                {"_id": f"{server.id}"},
+                {"$set": {"data.users": {f"{ctx.id}": {"xp": 0, "multiplier": 1, "banned": False, "created_at": f"{time.time()}", "moderation": {"warns": {}, "notes": {}}}}}}
             )
             return True
     else:
@@ -100,7 +100,7 @@ class database(commands.Cog):
             if f"{message.author.id}" in (await serverdb.find_one({"_id": f"{message.guild.id}"}))["data"]["users"]:
                 pass
             else:
-                await add_user(message)
+                await add_user(message.author, message.guild)
         else:
             await add_server(message)
     
@@ -110,7 +110,7 @@ class database(commands.Cog):
             if f"{member.id}" in (await serverdb.find_one({"_id": f"{member.guild.id}"}))["data"]["users"]:
                 pass
             else:
-                await add_user(member)
+                await add_user(member, member.guild)
         else:
             await add_server(member)
     
